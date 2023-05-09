@@ -22,7 +22,7 @@
 
 // for testing
 #define NUM_SAMPLES_TESTING 400
-#define TESTING 0
+#define TESTING 1
 
 // Controls definitions
 #define ANGLE_SETPOINT 0
@@ -38,11 +38,8 @@
 // PID constants
 float K_P = 1;
 float K_I = 0;
-float K_D = 0;
+float K_D = -1;
 
-// float K_P = 1;
-// float K_I = 0;
-// float K_D = -0.5;
 
 
 // global variables
@@ -63,7 +60,7 @@ void calculate_angle(){
 
 void setAngle_absolute(float angle2set){
 
-    if(angle2set > SERVO_SAFETY_MAX){
+    if(angle2set > SERVO_SAFETY_MAX){   
         ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(SERVO_SAFETY_MAX)));   
     }
     else if(angle2set < SERVO_SAFETY_MIN){
@@ -81,36 +78,36 @@ void setAngle(void){
 
     
     
-    // while(1){
-        initialAngle = servoAngle;
-        ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(initialAngle)));
-        printf("Error:%f Angle:%f Initial Angle:%f\n", error*GEAR_RATIO, initialAngle, servoAngle);
+    while(1){
+        // initialAngle = servoAngle;
+        // ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(initialAngle)));
+        // printf("Error:%f Angle:%f Initial Angle:%f\n", error*GEAR_RATIO, initialAngle, servoAngle);
 
         // vTaskDelay(200/portTICK_PERIOD_MS);
-        // if((initialAngle-servoAngle)>1 || (initialAngle-servoAngle)<-1)
-        // {
-        //     initialAngle+=((servoAngle-initialAngle)*NUM_SERVO_STEPS);
+        if((initialAngle-servoAngle)>1 || (initialAngle-servoAngle)<-1)
+        {
+            initialAngle+=((servoAngle-initialAngle)*NUM_SERVO_STEPS);
 
 
-        //     if(initialAngle > SERVO_SAFETY_MAX)
-        //     {
-        //         initialAngle = SERVO_SAFETY_MAX;
-        //     }
-        //     else if(initialAngle<SERVO_SAFETY_MIN)
-        //     {
-        //         initialAngle = SERVO_SAFETY_MIN;
-        //     }
+            if(initialAngle > SERVO_SAFETY_MAX)
+            {
+                initialAngle = SERVO_SAFETY_MAX;
+            }
+            else if(initialAngle<SERVO_SAFETY_MIN)
+            {
+                initialAngle = SERVO_SAFETY_MIN;
+            }
 
-        //     ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(initialAngle)));
-        // }
+            ESP_ERROR_CHECK(mcpwm_comparator_set_compare_value(comparator, example_angle_to_compare(initialAngle)));
+        }
 
-        // printf("Error:%f Angle:%f Initial Angle:%f\n", error, initialAngle, servoAngle);
+        printf("Error:%f Angle:%f Initial Angle:%f\n", error, initialAngle, servoAngle);
 
-        // vTaskDelay(DT_SERVO/ portTICK_PERIOD_MS); 
+        vTaskDelay(DT_SERVO/ portTICK_PERIOD_MS); 
 
     }
     
-// }
+}
 
 // calculate new angle based on PID
 void PID_tilt(void){

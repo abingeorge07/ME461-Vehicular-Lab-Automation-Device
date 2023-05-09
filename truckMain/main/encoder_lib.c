@@ -26,6 +26,12 @@ int32_t encoderValue = 0;
 float prevPosition = 0;
 rotary_encoder_t *encoder = NULL;
 
+
+void startEncoder(void){
+    // Start encoder
+    ESP_ERROR_CHECK(encoder->start(encoder));
+}
+
 void encoderInit(void){
 
     // Create rotary encoder instance
@@ -34,11 +40,7 @@ void encoderInit(void){
 
     // Filter out glitch (1us)
     ESP_ERROR_CHECK(encoder->set_glitch_filter(encoder, GLITCH_FILTER));
-}
-
-void startEncoder(void){
-    // Start encoder
-    ESP_ERROR_CHECK(encoder->start(encoder));
+    startEncoder();
 }
 
 // set radius of the wheel

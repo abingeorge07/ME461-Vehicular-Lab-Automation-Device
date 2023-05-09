@@ -25,25 +25,26 @@
 // DIR 1---------> PIN 25
 // DIR 2---------> PIN 33
 
-
 // Encoder
 // Signal 1 ------> PIN 14
 // Signal 2 ------> PIN 27
 
 #define PORT CONFIG_EXAMPLE_PORT
-#define MINIMUM_MOTOR_PWM 5000
+#define MINIMUM_MOTOR_PWM 30000
 #define STOP_MOTOR_PWM 3000
-#define THRESHOLD_IR 4000
+#define THRESHOLD_IR 4090
 #define RADIUS 1.0
 #define DT_ENCODER 50
 #define DT_MOTOR 50
 #define INIT_PWM 5000
 #define DT_MOTOR 50
 #define ACC_ADD 0x68 // address of IMU
-#define STEADY_SPEED_INCREASE 6000
-
+#define STEADY_SPEED_INCREASE 15000
+#define STEADY_SPEED_INCREASE_2 9000
 #define MAX_PWM 35000
-#define MIN_PWN 5000
+#define MIN_PWN 25000
+#define IMU_TASK_DELAY 10
+#define PID_CONSTANT 4000
 
 // MOTOR PINS
 #define GPIO_PWM0A_OUT 25   //Used to control direction
@@ -58,6 +59,7 @@ struct station{
 };
 
 struct station* stationArr = NULL;
+int* stationOrder;
 int numberStations = 0;
 int currentStation = 0;
 int startMotor = 0;
@@ -69,31 +71,56 @@ float change = 0;
 float distance2move = 0;
 int pwm = 0;
 int calStarted = 0;
-
-
+char text[100]; // used to send commands to main computer
+float angles[] = {0,0,0};
+uint32_t IR_reading = 0;
+int moving = 0;
+int nextStation;
+int timeout_stage = 0; // in milliseconds
+int sleep_switch = 0;
+float last2first = 0;// distance from the last station to the first one
+float trackLength = 0;
 // PID constants
-float K_P = 5;
+float K_P = 10;
 float K_I = 0.1;
 float K_D = -3000;
 
+
+// // Only used for calibration routing to get the trajectory of the track
+void getAngles(){
+
+    while(1){
+        if(calStarted == 0){
+            vTaskDelete(NULL);
+            break;
+        }
+
+        calculate_angle(angles);
+        vTaskDelay(IMU_TASK_DELAY/portTICK_PERIOD_MS);
+    }
+} 
+
+// Only used for the calibration routine
 void startCal(){
 
-    if(stationArr != NULL)
+    if(stationArr != NULL){
         free(stationArr);
+        free(stationOrder);
+    }
     
     stationArr = (struct station*) malloc(sizeof(struct station)*numberStations);
-    
+    stationOrder = (int*) malloc(sizeof(int)*numberStations); 
 
     // beginning the calibration
     brushed_motor_forward();
     motor_start();
     motor_setSpeed(MINIMUM_MOTOR_PWM);
 
-    uint32_t IR_reading = 0;
+    
 
     while(1){
         IR_reading= getIR();
-        printf("IR = %ld\n", IR_reading);
+        printf("IR = %ld and position = %f\n", IR_reading, get_absolutePosition());
         
         if(IR_reading>THRESHOLD_IR){
             // stop the truck
@@ -103,11 +130,13 @@ void startCal(){
             // reached the end
             if(currentStation == numberStations){
                 calStarted = 0;
+                last2first = get_absolutePosition() - stationArr[currentStation-1].absPosition;
+                trackLength += last2first;
                 currentStation = 0;
                 vTaskDelete(NULL);
                 break;
             }
-            stationArr[currentStation].stationNum = currentStation+1;
+            stationArr[currentStation].stationNum = currentStation;
             // add line to store the distance information
             stationArr[currentStation].absPosition = get_absolutePosition();
 
@@ -118,14 +147,14 @@ void startCal(){
             }
             else{
                 stationArr[currentStation].position = get_absolutePosition() - stationArr[currentStation-1].absPosition;
+                trackLength += stationArr[currentStation].position;
             }
             currentStation++;
             vTaskDelay(2000/portTICK_PERIOD_MS);
             brushed_motor_forward();
             motor_setSpeed(MINIMUM_MOTOR_PWM);
-            vTaskDelay(1000/portTICK_PERIOD_MS);
+            vTaskDelay(500/portTICK_PERIOD_MS);
         }
-            
 
         vTaskDelay(30/portTICK_PERIOD_MS);
     }
@@ -143,44 +172,48 @@ void motor_task(void){
             else{
                 brushed_motor_backward();
             }
-
-            if(distance2move <= 15 || distance2move >= -15){
+            
+            if(error <= 5 || error >= -5){
+                pwm = STEADY_SPEED_INCREASE_2 - INIT_PWM;
+                motor_setSpeed(STEADY_SPEED_INCREASE_2);
+            }
+            else if(error <= 10 || error >= -10){
                 pwm = STEADY_SPEED_INCREASE - INIT_PWM;
                 motor_setSpeed(STEADY_SPEED_INCREASE);
             }
             else{
                 if(error>0 && change >0){
-                    pwm = (change/distance2move) * 2000;
+                    pwm = (change/distance2move) * PID_CONSTANT;
                     
                     if((pwm+INIT_PWM) >= MAX_PWM)
                         pwm = MAX_PWM - 1 - INIT_PWM;
                     else if((pwm+INIT_PWM) <= MIN_PWN)
-                        pwm = 0;
+                        pwm = MIN_PWN - INIT_PWM;
 
                     motor_setSpeed(INIT_PWM + pwm);
                 }
                 else if (error > 0 && change< 0){
-                    pwm = (change/distance2move) * 2000;
+                    pwm = (change/distance2move) * PID_CONSTANT;
                     if((pwm+INIT_PWM) >= MAX_PWM)
                         pwm = MAX_PWM - 1 - INIT_PWM;
                     else if((pwm+INIT_PWM) <= MIN_PWN)
-                        pwm = 0;
+                        pwm = MIN_PWN - INIT_PWM;
 
                     motor_setSpeed(INIT_PWM + pwm);
                 }
                 else if (error < 0 && change < 0){
-                    pwm = (change/distance2move) * 2000;
+                    pwm = (change/distance2move) * PID_CONSTANT;
 
                     if((pwm+INIT_PWM) >= MAX_PWM)
                         pwm = MAX_PWM - 1 - INIT_PWM;
                     else if((pwm+INIT_PWM) <= MIN_PWN)
-                        pwm = 0;
+                        pwm = MIN_PWN - INIT_PWM;
 
 
                     motor_setSpeed(INIT_PWM + pwm);
                 }
                 else if (error < 0 && change > 0 ){
-                    pwm = (change/distance2move) * 2000;
+                    pwm = (change/distance2move) * PID_CONSTANT;
 
                     if((pwm+INIT_PWM) >= MAX_PWM)
                         pwm = MAX_PWM - 1 - INIT_PWM;
@@ -206,24 +239,36 @@ void motor_task(void){
 
 
 
-
-void PID_task(int nextStation){
-    distance2move = stationArr[nextStation-1].position - stationArr[currentStation].position;
+// use relative position for the next update
+void PID_task(){
+    moving = 1;
+    distance2move = stationArr[nextStation].absPosition - get_absolutePosition();
+    int temp = (int) (distance2move /trackLength);
+    distance2move = distance2move - (temp*trackLength);
+    distance2move = (distance2move > (trackLength/2))?(trackLength-distance2move): distance2move;
     float finalPosition = get_absolutePosition() + distance2move;
     startMotor = 1;
 
+    
     while(1){
         error = finalPosition - get_absolutePosition();
         derror_dt = (error - prevError)/ (DT_ENCODER);
         serror_dt = serror_dt + (((error+prevError)/2)*DT_ENCODER/1000.0);
+
+        printf("Error %f  Derror %f Serror %f\n", error, derror_dt, serror_dt);
 
         prevError = error;
         change = ((error * K_P) + (derror_dt * K_D) + (serror_dt*K_I));
 
         if(error<.1 && error>-.1){
             startMotor = 0;
-            brushed_motor_stop();
             serror_dt = 0;
+            currentStation = nextStation;
+            brushed_motor_stop();
+            vTaskDelay(timeout_stage/portTICK_PERIOD_MS);
+            moving = 0; 
+            // sleep_switch = 1;
+            // vTaskDelete(NULL);
             break;
         }
 
@@ -231,6 +276,8 @@ void PID_task(int nextStation){
         vTaskDelay(DT_ENCODER/ portTICK_PERIOD_MS);
     }
 }
+
+
 
 static void udp_server_task(void *pvParameters)
 {
@@ -339,15 +386,16 @@ static void udp_server_task(void *pvParameters)
                 }
 
                 rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string...
-                ESP_LOGI(TAG, "Received %d bytes from %s:", len, addr_str);
-                ESP_LOGI(TAG, "%s", rx_buffer);
+                // ESP_LOGI(TAG, "Received %d bytes from %s:", len, addr_str);
+                // ESP_LOGI(TAG, "%s", rx_buffer);
                 
-                char text[100];
                 // start calibration
                 if(strncmp(rx_buffer, "calXX", 2) == 0){
                     numberStations = atoi(rx_buffer+4);
                     printf("Number of Stations is %d\n", numberStations);
+                    calibration(accel, gyro);
                     xTaskCreate(startCal, "startCal", 4096, NULL, 5, NULL); 
+                    xTaskCreate(getAngles, "getAngles", 4096, NULL, 5, NULL); 
                     calStarted = 1;
                     sprintf(text, "OK");
                 }
@@ -355,20 +403,51 @@ static void udp_server_task(void *pvParameters)
                 else if(strncmp(rx_buffer, "Listening", 6) == 0){
 
                     if(calStarted == 1){
-                        sprintf(text, "OK");
-                        printf("calStarted %d\n", calStarted);
-                        // sprintf(text,"Ax: %f, Ay: %f, Az:%f, Gx: %f, Gy:%f, Gz:%f\n", accel[0], accel[1], accel[2], gyro[0], gyro[1], gyro[2]);
+                        // calculate_angle(angles);
+                        sprintf(text, "IR: %ld, Pos: %.1f, X: %.1f, Y: %.1f, Z: %.1f\n", IR_reading, get_absolutePosition(), angles[0], angles[1], angles[2]);
+                        // sprintf(text, "%ld\n", IR_reading);
+                        // printf("calStarted %d\n", calStarted);
                     }
+                    else if(moving == 1)
+                    {
+                        printf("error %f\n", error);
+                        sprintf(text, "error %f\n", error);
+
+                    }
+                    // else if(sleep_switch == 1){
+                    //     vTaskDelay(timeout_stage/ portTICK_PERIOD_MS);
+                    //     sleep_switch = 0;
+                    //     sprintf(text, "Done\n");
+                    // }
                     else{
-                        printf("Reached here\n");
+                        printf("Calibration is done\n");
                         sprintf(text, "Done\n");
                     }
 
                 }
                 else if(strncmp(rx_buffer, "move2", 5) == 0){
-                    int nextStation = atoi(rx_buffer + 6);
-                    PID_task(nextStation);
+                    nextStation = atoi(rx_buffer + 6) - 1;
+                    PID_task();
+                    // moving = 1;  
+                    // xTaskCreate(PID_task, "PID_task", 4096, NULL, 5, NULL); 
+                    sprintf(text, "Done\n");
                 }
+                else if(strncmp(rx_buffer, "time:", 4) == 0){
+                    sprintf(text, "Done\n");
+                    timeout_stage = atoi(rx_buffer + 6) * 1000;
+                }
+
+                    // else if(strncmp(rx_buffer, "Ord: ", 4) == 0){
+                //     int i;
+                //     for(i=0; i<numberStations; i++){
+                //         // little buggy if number of stations > 10
+                //         stationOrder[i] = atoi(rx_buffer + 5 + (2*i));
+                //         printf("%d\t", stationOrder[i]);
+                //     }
+                //     sprintf(text, "OK");
+                // }
+
+
                 int err = sendto(sock, text, strlen(text), 0, (struct sockaddr *)&source_addr, sizeof(source_addr));
                 if (err < 0) {
                     ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
@@ -407,6 +486,10 @@ void app_main(void)
     //encoder init
     encoderInit();
     setRadius(RADIUS);
+
+    // IMU init
+    init_IMU();
+
 
     #ifdef CONFIG_EXAMPLE_IPV4
         xTaskCreate(udp_server_task, "udp_server", 4096, (void*)AF_INET, 5, NULL);

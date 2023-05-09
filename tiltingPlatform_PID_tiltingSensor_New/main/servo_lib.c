@@ -3,17 +3,19 @@
 #include "esp_log.h"
 #include "driver/mcpwm_prelude.h"
 
-static const char *TAG = "example";
+
 
 // Please consult the datasheet of your servo before changing the following parameters
-#define SERVO_MIN_PULSEWIDTH_US 300  // Minimum pulse width in microsecond
-#define SERVO_MAX_PULSEWIDTH_US 2600  // Maximum pulse width in microsecond
+#define SERVO_MIN_PULSEWIDTH_US 500  // Minimum pulse width in microsecond
+#define SERVO_MAX_PULSEWIDTH_US 2500  // Maximum pulse width in microsecond
 #define SERVO_MIN_DEGREE        -90   // Minimum angle
 #define SERVO_MAX_DEGREE        90    // Maximum angle
 
 #define SERVO_PULSE_GPIO             32        // GPIO connects to the PWM signal line
 #define SERVO_TIMEBASE_RESOLUTION_HZ 1000000  // 1MHz, 1us per tick
-#define SERVO_TIMEBASE_PERIOD        35000    // 20000 ticks, 20ms
+#define SERVO_TIMEBASE_PERIOD        25000    // 20000 ticks, 20ms
+#define SERVO_SAFETY_MIN        -82
+#define SERVO_SAFETY_MAX        82
 
 static inline uint32_t example_angle_to_compare(int angle)
 {
@@ -23,7 +25,10 @@ static inline uint32_t example_angle_to_compare(int angle)
 
 mcpwm_cmpr_handle_t comparator = NULL;
 
+
 void servo_init(){
+    static const char *TAG = "example";
+    
     ESP_LOGI(TAG, "Create timer and operator");
     mcpwm_timer_handle_t timer = NULL;
     mcpwm_timer_config_t timer_config = {
@@ -74,3 +79,5 @@ void servo_init(){
     ESP_ERROR_CHECK(mcpwm_timer_enable(timer));
     ESP_ERROR_CHECK(mcpwm_timer_start_stop(timer, MCPWM_TIMER_START_NO_STOP));
 }
+
+

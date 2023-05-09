@@ -12,7 +12,7 @@
 #define VOLTAGE_MIN 6.0
 #define VOLTAGE_MAX 9.2
 
-#define INITIAL_PWM 4000
+#define INITIAL_PWM 5000
 
 static const char *TAG = "example";
 mcpwm_cmpr_handle_t comparator = NULL;
@@ -25,8 +25,8 @@ int pwm_init = INITIAL_PWM;
 #define GPIO_PWM0B_OUT 33   
 #define PWM_MOTOR_GPIO  32
 
-#define MAX_PWM 35000
-#define MIN_PWN 5000
+// #define MAX_PWM 35000
+// #define MIN_PWN 5000
 
 // GPIO connects to the PWM signal line
 #define SERVO_TIMEBASE_RESOLUTION_HZ 1000000  // 1MHz, 1us per tick
@@ -48,9 +48,9 @@ static void mcpwm_example_gpio_initialize(void)
 }
 
 /**
- * @brief motor moves in forward direction, with duty cycle = duty %
+ * @brief motor moves in backward direction, with duty cycle = duty %
  */
-static void brushed_motor_forward(void)
+static void brushed_motor_backward(void)
 {
 
     gpio_set_level(GPIO_PWM0A_OUT, 0);
@@ -59,9 +59,9 @@ static void brushed_motor_forward(void)
 }
 
 /**
- * @brief motor moves in backward direction, with duty cycle = duty %
+ * @brief motor moves in forward direction, with duty cycle = duty %
  */
-static void brushed_motor_backward(void)
+static void brushed_motor_forward(void)
 {
     gpio_set_level(GPIO_PWM0A_OUT, 1);
     gpio_set_level(GPIO_PWM0B_OUT, 0);  

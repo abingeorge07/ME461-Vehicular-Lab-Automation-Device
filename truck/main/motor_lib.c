@@ -42,22 +42,24 @@ static void mcpwm_example_gpio_initialize(void)
 }
 
 /**
- * @brief motor moves in forward direction, with duty cycle = duty %
- */
-static void brushed_motor_forward(void)
-{
-
-    gpio_set_level(GPIO_PWM0A_OUT, 0);
-    gpio_set_level(GPIO_PWM0B_OUT, 1);
-}
-
-/**
  * @brief motor moves in backward direction, with duty cycle = duty %
  */
 static void brushed_motor_backward(void)
 {
+
+    gpio_set_level(GPIO_PWM0A_OUT, 0);
+    gpio_set_level(GPIO_PWM0B_OUT, 1);
+    pwm_init = INITIAL_PWM;
+}
+
+/**
+ * @brief motor moves in forward direction, with duty cycle = duty %
+ */
+static void brushed_motor_forward(void)
+{
     gpio_set_level(GPIO_PWM0A_OUT, 1);
     gpio_set_level(GPIO_PWM0B_OUT, 0);  
+    pwm_init = INITIAL_PWM;
 }
 
 /**

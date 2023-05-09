@@ -47,11 +47,12 @@
 #define ACK_CHECK_EN                       0x1
 #define ACC_ADDRESS                        0x68
 
-#define MPU6050_REG_DEVID               (0x00) 
-#define ACK_CHECK_DIS                       0x0
+#define MPU6050_REG_DEVID                  (0x00) 
+#define ACK_CHECK_DIS                      0x0
 
 #define NUM_CALIBRATION 200.0 // must be greater than NUM_BAD_VALUES
 #define NUM_BAD_VALUES 100.0
+#define IMU_TASK_DELAY 10
 
 
 
@@ -258,7 +259,7 @@ void getAccel(float* accel){
 }
 
 
-void getGyro(float* gyro){
+void getGyro(){
 
     float val = read16(REG_GX_H, ACC_ADDRESS) /131.0;
     gyro[0] = (float) val - gyro_offset[0];
@@ -269,6 +270,24 @@ void getGyro(float* gyro){
     val = read16(REG_GZ_H, ACC_ADDRESS) /131.0;
     gyro[2] = (float) val - gyro_offset[2];
 
+}
+
+
+void calculate_angle(float* angles){
+
+  // get new gyro values
+  getGyro();
+
+  // calculating area under graph using trapezoidal
+  angles[0] += 0.5*(IMU_TASK_DELAY/1000.0)*(float)((round(gyro_prev[0]*100)/100.0) + (round(gyro[0]*100)/100.0));
+  angles[1] += 0.5*(IMU_TASK_DELAY/1000.0)*(float)(round(gyro_prev[1]) + round(gyro[1]));
+  angles[2] += 0.5*(IMU_TASK_DELAY/1000.0)*(float)(round(gyro_prev[2]) + round(gyro[2]));
+
+  // update the previous value
+  gyro_prev[0] = gyro[0];
+  gyro_prev[1] = gyro[1];
+  gyro_prev[2] = gyro[2];
+    
 }
 
 
@@ -339,7 +358,7 @@ void init_IMU(){
     writeRegister(0x6B, 0, ACC_ADDRESS);
 
     // calibration of IMU
-    calibration(accel, gyro);
+    // calibration(accel, gyro);
 }
 
 

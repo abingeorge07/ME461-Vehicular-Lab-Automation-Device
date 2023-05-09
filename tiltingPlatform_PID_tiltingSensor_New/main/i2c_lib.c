@@ -1,5 +1,4 @@
 #include <arpa/inet.h>
-#include "driver/mcpwm_prelude.h"
 #include "driver/uart.h"
 #include "driver/gpio.h"
 #include <stdio.h>
@@ -25,9 +24,13 @@
 #include "addr_from_stdin.h"
 #include <math.h>
 #include <stdlib.h>
+#include "string.h"
 //GPIO task
+#include "driver/gpio.h"
+#include "driver/uart.h"
+#include "driver/ledc.h"
 #include "driver/i2c.h"
-// /// ADC
+/// ADC
 #include "driver/adc.h"
 #include "esp_adc_cal.h"
 #include "freertos/queue.h"
@@ -38,38 +41,29 @@
 #include "accel_reg.h"
 
 
-
 //////////// Def of I2C
 #define WRITE_BIT                          0x0 // i2c master write
 #define READ_BIT                           0x1  // i2c master read
 #define I2C_EXAMPLE_MASTER_SCL_IO          22   // gpio number for i2c clk
-#define I2C_EXAMPLE_MASTER_SDA_IO          23   // gpio number for i2c data
+#define I2C_EXAMPLE_MASTER_SDA_IO          21   // gpio number for i2c data
 #define I2C_EXAMPLE_MASTER_NUM             I2C_NUM_0  // i2c port
 #define I2C_EXAMPLE_MASTER_TX_BUF_DISABLE  0    // i2c master no buffer needed
 #define I2C_EXAMPLE_MASTER_RX_BUF_DISABLE  0    // i2c master no buffer needed
 #define I2C_EXAMPLE_MASTER_FREQ_HZ         400000     // i2c master clock freq
 #define ACK_CHECK_EN                       0x1
-#define ACC_ADDRESS                        0x68
-
-#define MPU6050_REG_DEVID               (0x00) 
+#define ACC_ADDRESS                        0x50
+#define I2C_MASTER_ACK                     0x0
+#define I2C_MASTER_NACK                     0x1
+#define REG                                0x3d
+#define MPU6050_REG_DEVID                 (0x00) 
 #define ACK_CHECK_DIS                       0x0
-
-#define NUM_CALIBRATION 200.0 // must be greater than NUM_BAD_VALUES
-#define NUM_BAD_VALUES 100.0
-
-
-
 
 
 
 //////////// OFFSETS FOR ACCEL VALUES
-float accel_offset[3] = {0,0,0};
-float gyro_offset[3] = {0,0,0};
-
-// main global variables
-float accel[3];
-float gyro[3];
-float gyro_prev[3] = {0, 0, 0};
+float angle_offset[3] = {0,0,0};
+uint8_t data[6];
+int i2c_master_port;
 
 // checks if address x is an i2c device
 int testConnection(uint8_t devAddr, int32_t timeout) {
@@ -125,7 +119,7 @@ int getDeviceID(uint8_t *data) {
   i2c_master_write_byte(cmd, MPU6050_REG_DEVID, ACK_CHECK_EN);
   i2c_master_start(cmd);
   i2c_master_write_byte(cmd, (ACC_ADDRESS << 1 ) | READ_BIT, ACK_CHECK_EN);
-  i2c_master_read_byte(cmd, data, ACK_CHECK_DIS);
+  i2c_master_read_byte(cmd, data, I2C_MASTER_ACK);
   i2c_master_stop(cmd);
   ret = i2c_master_cmd_begin(I2C_EXAMPLE_MASTER_NUM, cmd, 1000 / portTICK_PERIOD_MS);
   i2c_cmd_link_delete(cmd);
@@ -172,178 +166,89 @@ void writeRegister(uint8_t reg, uint8_t data, uint8_t address) {
 
 }
 
-// reads register
-uint8_t readRegister(uint8_t reg , uint8_t address) {
 
-
-  uint8_t data1; //first byte MSB
-
+float readRegister(uint8_t reg) {
   i2c_cmd_handle_t cmd = i2c_cmd_link_create();
-  i2c_cmd_handle_t cmd1 = i2c_cmd_link_create();
-
-  // Start
+  int ret;
   i2c_master_start(cmd);
-  // Master write slave address + write bit
-  i2c_master_write_byte(cmd, ( address << 1 ) | WRITE_BIT, I2C_MASTER_ACK); 
-  // Master write register address + send ack
-  i2c_master_write_byte(cmd, reg, I2C_MASTER_ACK); 
-  //master stops
+  i2c_master_write_byte(cmd, (ACC_ADDRESS << 1 ) | WRITE_BIT, ACK_CHECK_EN);
+  i2c_master_write_byte(cmd, reg, ACK_CHECK_EN);
+  i2c_master_start(cmd);
+  i2c_master_write_byte(cmd, (ACC_ADDRESS << 1 ) | READ_BIT, ACK_CHECK_EN);
+  i2c_master_read(cmd, data, 5, I2C_MASTER_ACK);
+  i2c_master_read_byte(cmd, data+5, I2C_MASTER_NACK);
   i2c_master_stop(cmd);
-  // This starts the I2C communication
-  i2c_master_cmd_begin(I2C_EXAMPLE_MASTER_NUM, cmd, 1000 / portTICK_PERIOD_MS); 
+  ret = i2c_master_cmd_begin(I2C_EXAMPLE_MASTER_NUM, cmd, 10 / portTICK_PERIOD_MS);
+  i2c_master_stop(cmd);
   i2c_cmd_link_delete(cmd);
-
-  //master starts
-  i2c_master_start(cmd1);
-  // Master write slave address + read bit
-  i2c_master_write_byte(cmd1, ( address  << 1 ) | READ_BIT, I2C_MASTER_ACK);  
-  // Master reads in slave ack and data
-  i2c_master_read_byte(cmd1, &data1 , I2C_MASTER_NACK);
-  // Master nacks and stops.
-  i2c_master_stop(cmd1);
-  // This starts the I2C communication
-  i2c_master_cmd_begin(I2C_EXAMPLE_MASTER_NUM, cmd1, 1000 / portTICK_PERIOD_MS); 
-  i2c_cmd_link_delete(cmd1);
-
-  return data1;
-}
-
-// sets range for gyro
-void setGyroRange(uint8_t sel){
-
-    /* Red the data format register to preserve bits */
-    uint8_t format = readRegister(GYRO_RANGE, ACC_ADDRESS);
-
-    // bit manipulation
-    format &=  0xE7;
-    format = format | (sel<<3);
-    
-    // write back to the register
-    writeRegister(GYRO_RANGE, format, ACC_ADDRESS);
+  float output = (float)((((uint16_t)data[1]<<8) | data[0]));
+  return output;
 }
 
 
-// sets range for gyro
-void setAccelRange(uint8_t sel){
+ void getAngle(float* angle){
+  float temp;
+  temp = readRegister(0x3d);
+  temp = (int16_t)(((data[1]<<8) | data[0]));
+  angle[0] = (float)((temp/32768.0)*180) - angle_offset[0];
 
-    /* Red the data format register to preserve bits */
-    uint8_t format = readRegister(ACC_RANGE, ACC_ADDRESS);
 
-    // bit manipulation
-    format &=  0xE7;
-    format = format | (sel<<3);
-    
-    // write back to the register
-    writeRegister(ACC_RANGE, format, ACC_ADDRESS);
-}
+  temp = (int16_t)(((data[3]<<8) | data[2]));
+  angle[1] = (float)((temp/32768.0)*180) - angle_offset[1];
 
-// read 16 bits (reg and reg+1)
-int16_t read16(uint8_t reg , uint8_t address){
-    
-    uint8_t MSB = readRegister(reg, ACC_ADDRESS); 
-    uint8_t LSB = readRegister(reg+1, ACC_ADDRESS); 
-
-    int16_t  out = (int16_t) ((MSB << 8) | LSB);
-
-    return out;
-}
-
-void getAccel(float* accel){
-
-    accel[0] = read16(REG_AX_H, ACC_ADDRESS)/16384.0 - accel_offset[0];// - (2.0*9.81);
-    // accel[0] = (float) val;
-
-    accel[1] = read16(REG_AY_H, ACC_ADDRESS)/16384.0  - accel_offset[1];// - (2.0*9.81);
-    // accel[1] = (float) val;
-
-    accel[2] = read16(REG_AZ_H, ACC_ADDRESS)/16384.0  - accel_offset[2];// - (2.0*9.81);
-    // accel[2] = (float) val;
+  temp = (int16_t)(((data[5]<<8) | data[4]));
+  angle[2] = (float)((temp/32768.0)*180) - angle_offset[2];
 
 }
 
+void calibration(void){
 
-void getGyro(float* gyro){
-
-    float val = read16(REG_GX_H, ACC_ADDRESS) /131.0;
-    gyro[0] = (float) val - gyro_offset[0];
-
-    val = read16(REG_GY_H, ACC_ADDRESS) /131.0;
-    gyro[1] = (float) val - gyro_offset[1];
-
-    val = read16(REG_GZ_H, ACC_ADDRESS) /131.0;
-    gyro[2] = (float) val - gyro_offset[2];
-
-}
-
-
-void calibration(float* accel, float* gyro, int numCal, int numBad){
-
-  float accelOffset[3];
-  float gyroOffset[3];
+  float angleOffset_acc[3];
+  float angles[3];
+  int num = 100;
   int i;
+  float temp;
 
   printf("-------------CALIBRATION--------------\n");
 
-  for(i=0; i<numCal; i++){
-    getAccel(accel);
-    getGyro(gyro);
-  
-    if(i>=numBad){
-      accelOffset[0] +=  accel[0];
-      accelOffset[1] +=  accel[1];
-      accelOffset[2] +=  (accel[2] + 9.8);
+  for(i=0; i<num; i++){
+    getAngle(angles);
+    angleOffset_acc[0] += angles[0];
+    angleOffset_acc[1] += angles[1];
+    angleOffset_acc[2] += angles[2]; 
 
-      gyroOffset[0] += gyro[0];
-      gyroOffset[1] += gyro[1];
-      gyroOffset[2] += gyro[2];
-    }
-
-    vTaskDelay(50 / portTICK_PERIOD_MS);   
+    vTaskDelay(50 / portTICK_PERIOD_MS);  
 
   }
 
   printf("-------------END CALIBRATION--------------\n");
 
   for (i=0; i<3; i++){
-    accel_offset[i] = accelOffset[i] / (NUM_CALIBRATION-NUM_BAD_VALUES);
-    gyro_offset[i] =  gyroOffset[i] / (NUM_CALIBRATION-NUM_BAD_VALUES);
+    angle_offset[i] = angleOffset_acc[i] / (float)num;
   }
 
-  printf("Offset Values :\nAccel: %f %f %f\n", accel_offset[0], accel_offset[1], accel_offset[2]);
-  printf("Gyro: %f %f %f\n", gyro_offset[0], gyro_offset[1], gyro_offset[2]);
+
+  printf("Offset Values :\nAngle: %f %f %f\n", angle_offset[0], angle_offset[1], angle_offset[2]);
 
 }
 
+void init_IMU(void){
+  i2c_master_init();
+  i2c_scanner();
 
-void init_IMU(){
-  // IMU initializations
-    i2c_master_init();
-    i2c_scanner();
+  // UART Init
+  ESP_ERROR_CHECK( uart_driver_install(UART_NUM_0,
+  256, 0, 0, NULL, 0) );
 
-    // UART Init
-    ESP_ERROR_CHECK( uart_driver_install(UART_NUM_0,
-    256, 0, 0, NULL, 0) );
+  /* Tell VFS to use UART driver */
+  esp_vfs_dev_uart_use_driver(UART_NUM_0);
+  writeRegister(0x03, 0x0b, ACC_ADDRESS);
+  writeRegister(0x01, 0x01, ACC_ADDRESS);
+  writeRegister(0x01, 0x02, ACC_ADDRESS);
+  writeRegister(0x24, 0x00, ACC_ADDRESS);
 
-    /* Tell VFS to use UART driver */
-    esp_vfs_dev_uart_use_driver(UART_NUM_0);
+  uint8_t deviceID_acc;
+  getDeviceID(&deviceID_acc);
 
-    uint8_t deviceID_acc;
-    getDeviceID(&deviceID_acc);
-
-    // Disable interrupts
-    writeRegister(REG_INTR_EN, 0, ACC_ADDRESS);
-
-    // setRange
-    setGyroRange(GYRO250);
-
-    // // setRange
-    setAccelRange(ACC250);
-
-    //turn off standby mode or start measuring
-    writeRegister(0x6B, 0, ACC_ADDRESS);
-
-    // calibration of IMU
-    calibration(accel, gyro, NUM_CALIBRATION, NUM_BAD_VALUES);
+  calibration();
 }
-
-
