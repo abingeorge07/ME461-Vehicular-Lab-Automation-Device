@@ -16,7 +16,7 @@ Team VLAD Members:
 
 
 ## Motivation and Goals
-This was our senior design project at Boston University, with the main objective of showcasing our skills as an engineer. This project was proposed by Dr. Keith Brown. More information on the project details and our solution can be found in our [final report.](Assets/Team%2021%20Vlad%20ME461%20Final%20Report.pdf)
+This was our senior design project at Boston University, with the main objective of showcasing our skills as an engineer. This project was proposed by Dr. Keith Brown. More information on the project details and our solution can be found in our [final report.](Assets/Team%2021%20Vlad%20ME461%20Final%20Report.pdf) A huge thanks to Dr. Brown and Professor Anthony Linn for their support.
 
 
 ## Individual Peripherals
@@ -38,7 +38,3 @@ This folder contains the systems code to move the truck along the track.
 
 ## VLAD
 This folder contains the main code for the GUI. It contains frameworks to plot and communicate via UDP to the microcontroller.
-
-
-
-<b> More information to come</b>
