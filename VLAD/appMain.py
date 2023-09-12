@@ -17,6 +17,7 @@ GUI = 1
 # sg.theme_previewer()
 
 # SOCKET DEFINITIONS
+# IP2 will change 
 IP2 = "192.168.137.254"
 IP = "192.168.137.1"
 PORT = 3333
