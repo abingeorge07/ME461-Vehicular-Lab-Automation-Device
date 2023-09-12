@@ -84,6 +84,7 @@ def sendMessage():
         calibrationBegin = 0
 
 
+# move to a station based on a list
 def moveStation(seqList): 
     global seqExists
     global loop

@@ -129,6 +129,7 @@ def startCal():
     return sg.Window(title="VLAD", layout= layoutU, size = [850,450])
 
 
+# unused function, not in the final implementation
 def draw_figure(canvas, figure, loc=(0, 0)):
     figure_canvas_agg = FigureCanvasTkAgg(figure, canvas)
     figure_canvas_agg.draw()
