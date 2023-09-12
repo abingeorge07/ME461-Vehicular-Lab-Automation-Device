@@ -22,7 +22,7 @@
 
 // for testing
 #define NUM_SAMPLES_TESTING 1000
-#define TESTING 0
+#define TESTING 0 // 0-> No Testing ; 1-> Testing
 
 // Controls definitions
 #define ANGLE_SETPOINT 0
@@ -32,9 +32,10 @@
 #define DT_IMU 20 // in milliseconds
 #define DT_SERVO 10  // in milliseconds
 
-// number of interations for the servo to move to reach the final 
-// each iteration moves 20% of total distance to final position 
+// each iteration moves 80% of total distance to final position 
+// to account for slow servo movement and fast elevation change
 #define NUM_SERVO_STEPS (0.8)
+// error range that is acceptable
 #define HYST          0.1
 
 // PID constants
@@ -58,6 +59,9 @@ void calculate_angle(){
     getAngle(angles);    
 }
 
+// servo uses absolute angles 
+// only used when starting 
+// redundant
 void setAngle_absolute(float angle2set){
 
     if(angle2set > SERVO_SAFETY_MAX){
@@ -72,6 +76,8 @@ void setAngle_absolute(float angle2set){
 
 }
 
+
+
 void setAngle(void){
 
     float initialAngle = 0;
@@ -80,6 +86,7 @@ void setAngle(void){
 
         if((initialAngle-servoAngle)>HYST || (initialAngle-servoAngle)<-1*HYST)
         {
+
             if(initialAngle > SERVO_SAFETY_MAX)
             {
                 initialAngle = SERVO_SAFETY_MAX;
@@ -90,7 +97,6 @@ void setAngle(void){
             }
             else
             {
-    
                 initialAngle+=((servoAngle-initialAngle)*NUM_SERVO_STEPS);
             }
 
@@ -143,6 +149,7 @@ void IMU_task(void){
 }
 
 
+// testing function, only used when testing
 void IMU_task_testing(void){
 
     while(1)
