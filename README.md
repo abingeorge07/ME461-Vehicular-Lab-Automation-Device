@@ -1,7 +1,10 @@
 # ME461-Vehicular-Lab-Automation-Device
 <b>Boston University ENG 2023: Senior Capstone</b> 
 
-![screenshot](Images/VLAD.png)
+<p align="center" width="100%">
+    <img width="33%" src="Images/VLAD.png"> 
+</p>
+
 
 Team VLAD Members:
 
