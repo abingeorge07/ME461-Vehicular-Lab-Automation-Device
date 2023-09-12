@@ -80,13 +80,16 @@ int timeout_stage = 0; // in milliseconds
 int sleep_switch = 0;
 float last2first = 0;// distance from the last station to the first one
 float trackLength = 0;
+
 // PID constants
 float K_P = 10;
 float K_I = 0.1;
 float K_D = -3000;
 
 
-// // Only used for calibration routing to get the trajectory of the track
+// Only used for calibration routine to get the trajectory of the track
+// not used in final implementation
+// could be potentially used to get a nice visual of the track
 void getAngles(){
 
     while(1){
@@ -94,13 +97,13 @@ void getAngles(){
             vTaskDelete(NULL);
             break;
         }
-
         calculate_angle(angles);
         vTaskDelay(IMU_TASK_DELAY/portTICK_PERIOD_MS);
     }
 } 
 
 // Only used for the calibration routine
+// essentially finds and locates all the test stations
 void startCal(){
 
     if(stationArr != NULL){
@@ -162,6 +165,7 @@ void startCal(){
 
 
 
+// main function to move the truck to the destination
 void motor_task(void){
 
     while(1){
@@ -278,7 +282,7 @@ void PID_task(){
 }
 
 
-
+// main communication module with the python script
 static void udp_server_task(void *pvParameters)
 {
     char rx_buffer[128];
@@ -482,11 +486,9 @@ void app_main(void)
     brushed_motor_stop();
     // IR init
     IR_init();
-
     //encoder init
     encoderInit();
     setRadius(RADIUS);
-
     // IMU init
     init_IMU();
 
