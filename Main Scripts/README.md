@@ -1,5 +1,5 @@
 # Main Scripts
-This folder contains the main scripts for the microcontrollers and the laptop
+This folder contains the main scripts for the microcontrollers and the PC
 sending instructions to the microcontroller.
 
 ## Tilting Platform
