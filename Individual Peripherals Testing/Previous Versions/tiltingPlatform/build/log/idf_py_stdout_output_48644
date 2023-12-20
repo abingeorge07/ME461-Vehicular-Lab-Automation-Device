@@ -1,0 +1,60 @@
+[1/9] Performing build step for 'bootloader'
+[1/1] cmd.exe /C "cd /D C:\Personal\SeniorCapstone\tiltingPlatform\build\bootloader\esp-idf\esptool_py && C:\Espressif\python_env\idf5.0_py3.8_env\Scripts\python.exe C:/Espressif/frameworks/esp-idf-v5.0/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 C:/Personal/SeniorCapstone/tiltingPlatform/build/bootloader/bootloader.bin"
+Bootloader binary size 0x66b0 bytes. 0x950 bytes (8%) free.
+[2/7] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/tiltingPlatform.c.obj
+In file included from C:/Personal/SeniorCapstone/tiltingPlatform/main/i2c_lib.c:34,
+                 from C:/Personal/SeniorCapstone/tiltingPlatform/main/tiltingPlatform.c:18:
+C:/Espressif/frameworks/esp-idf-v5.0/components/driver/deprecated/driver/adc.h:19:2: warning: #warning "legacy adc driver is deprecated, please migrate to use esp_adc/adc_oneshot.h and esp_adc/adc_continuous.h for oneshot mode and continuous mode drivers respectively" [-Wcpp]
+   19 | #warning "legacy adc driver is deprecated, please migrate to use esp_adc/adc_oneshot.h and esp_adc/adc_continuous.h for oneshot mode and continuous mode drivers respectively"
+      |  ^~~~~~~
+In file included from C:/Personal/SeniorCapstone/tiltingPlatform/main/i2c_lib.c:35,
+                 from C:/Personal/SeniorCapstone/tiltingPlatform/main/tiltingPlatform.c:18:
+C:/Espressif/frameworks/esp-idf-v5.0/components/esp_adc/deprecated/include/esp_adc_cal.h:17:2: warning: #warning "legacy adc calibration driver is deprecated, please migrate to use esp_adc/adc_cali.h and esp_adc/adc_cali_scheme.h" [-Wcpp]
+   17 | #warning "legacy adc calibration driver is deprecated, please migrate to use esp_adc/adc_cali.h and esp_adc/adc_cali_scheme.h"
+      |  ^~~~~~~
+In file included from C:/Personal/SeniorCapstone/tiltingPlatform/main/i2c_lib.c:41,
+                 from C:/Personal/SeniorCapstone/tiltingPlatform/main/tiltingPlatform.c:18:
+C:/Espressif/frameworks/esp-idf-v5.0/components/driver/deprecated/driver/mcpwm.h:15:2: warning: #warning "legacy MCPWM driver is deprecated, please migrate to the new driver (include driver/mcpwm_prelude.h)" [-Wcpp]
+   15 | #warning "legacy MCPWM driver is deprecated, please migrate to the new driver (include driver/mcpwm_prelude.h)"
+      |  ^~~~~~~
+C:/Personal/SeniorCapstone/tiltingPlatform/main/tiltingPlatform.c: In function 'app_main':
+C:/Personal/SeniorCapstone/tiltingPlatform/main/tiltingPlatform.c:214:17: warning: passing argument 1 of 'xTaskCreate' from incompatible pointer type [-Wincompatible-pointer-types]
+  214 |     xTaskCreate(IMU_task, "IMU_task", 4096, NULL, 5, NULL);
+      |                 ^~~~~~~~
+      |                 |
+      |                 void (*)(void)
+In file included from C:/Personal/SeniorCapstone/tiltingPlatform/main/tiltingPlatform.c:5:
+C:/Espressif/frameworks/esp-idf-v5.0/components/freertos/FreeRTOS-Kernel/include/freertos/task.h:444:44: note: expected 'TaskFunction_t' {aka 'void (*)(void *)'} but argument is of type 'void (*)(void)'
+  444 |                             TaskFunction_t pvTaskCode,
+      |                             ~~~~~~~~~~~~~~~^~~~~~~~~~
+[3/7] Linking C static library esp-idf\main\libmain.a
+[4/7] Generating ld/sections.ld
+FAILED: esp-idf/esp_system/ld/sections.ld C:/Personal/SeniorCapstone/tiltingPlatform/build/esp-idf/esp_system/ld/sections.ld 
+cmd.exe /C "cd /D C:\Personal\SeniorCapstone\tiltingPlatform\build\esp-idf\esp_system && C:\Espressif\python_env\idf5.0_py3.8_env\Scripts\python.exe C:/Espressif/frameworks/esp-idf-v5.0/tools/ldgen/ldgen.py --config C:/Personal/SeniorCapstone/tiltingPlatform/sdkconfig --fragments-list C:/Espressif/frameworks/esp-idf-v5.0/components/xtensa/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/esp_ringbuf/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/driver/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/esp_pm/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/spi_flash/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/esp_system/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/esp_system/app.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/esp_rom/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/hal/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/log/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/heap/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/soc/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/esp_hw_support/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/freertos/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/newlib/newlib.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/newlib/system_libs.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/esp_common/common.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/esp_common/soc.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/app_trace/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/esp_event/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/esp_phy/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/lwip/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/esp_netif/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/esp_wifi/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/bt/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/esp_adc/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/esp_gdbstub/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/esp_lcd/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/esp_psram/linker.lf;C:/Espressif/frameworks/esp-idf-v5.0/components/espcoredump/linker.lf --input C:/Espressif/frameworks/esp-idf-v5.0/components/esp_system/ld/esp32/sections.ld.in --output C:/Personal/SeniorCapstone/tiltingPlatform/build/esp-idf/esp_system/ld/sections.ld --kconfig C:/Espressif/frameworks/esp-idf-v5.0/Kconfig --env-file C:/Personal/SeniorCapstone/tiltingPlatform/build/config.env --libraries-file C:/Personal/SeniorCapstone/tiltingPlatform/build/ldgen_libraries --objdump C:/Espressif/tools/xtensa-esp32-elf/esp-2022r1-11.2.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-objdump.exe"
+Traceback (most recent call last):
+  File "C:\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\pyparsing\core.py", line 817, in _parseNoCache
+    loc, tokens = self.parseImpl(instring, pre_loc, doActions)
+  File "C:\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\pyparsing\core.py", line 2337, in parseImpl
+    if instring[loc] == self.firstMatchChar and instring.startswith(
+IndexError: string index out of range
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Espressif\frameworks\esp-idf-v5.0\tools\ldgen\ldgen\entity.py", line 124, in add_sections_info
+    results = parser.parseString(first_line, parseAll=True)
+  File "C:\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\pyparsing\core.py", line 1141, in parse_string
+    raise exc.with_traceback(None)
+pyparsing.exceptions.ParseException: Expected 'In archive'  (at char 0), (line:1, col:1)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:/Espressif/frameworks/esp-idf-v5.0/tools/ldgen/ldgen.py", line 183, in <module>
+    main()
+  File "C:/Espressif/frameworks/esp-idf-v5.0/tools/ldgen/ldgen.py", line 141, in main
+    sections_infos.add_sections_info(dump)
+  File "C:\Espressif\frameworks\esp-idf-v5.0\tools\ldgen\ldgen\entity.py", line 126, in add_sections_info
+    raise ParseException('Parsing sections info for library ' + sections_info_dump.name + ' failed. ' + p.msg)
+pyparsing.exceptions.ParseException: Parsing sections info for library C:/Personal/SeniorCapstone/tiltingPlatform/build/esp-idf/ulp/libulp.a failed. Expected 'In archive'  (at char 0), (line:1, col:1)
+ninja: build stopped: subcommand failed.

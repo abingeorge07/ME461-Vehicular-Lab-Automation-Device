@@ -1,0 +1,53 @@
+[1/9] Performing build step for 'bootloader'
+[1/1] cmd.exe /C "cd /D C:\Personal\SeniorCapstone\tiltingPlatform_PID_tiltingSensor\build\bootloader\esp-idf\esptool_py && C:\Espressif\python_env\idf5.0_py3.8_env\Scripts\python.exe C:/Espressif/frameworks/esp-idf-v5.0/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 C:/Personal/SeniorCapstone/tiltingPlatform_PID_tiltingSensor/build/bootloader/bootloader.bin"
+Bootloader binary size 0x66b0 bytes. 0x950 bytes (8%) free.
+[2/7] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/tiltingPlatform.c.obj
+In file included from C:/Personal/SeniorCapstone/tiltingPlatform_PID_tiltingSensor/main/i2c_lib.c:34,
+                 from C:/Personal/SeniorCapstone/tiltingPlatform_PID_tiltingSensor/main/tiltingPlatform.c:17:
+C:/Espressif/frameworks/esp-idf-v5.0/components/driver/deprecated/driver/adc.h:19:2: warning: #warning "legacy adc driver is deprecated, please migrate to use esp_adc/adc_oneshot.h and esp_adc/adc_continuous.h for oneshot mode and continuous mode drivers respectively" [-Wcpp]
+   19 | #warning "legacy adc driver is deprecated, please migrate to use esp_adc/adc_oneshot.h and esp_adc/adc_continuous.h for oneshot mode and continuous mode drivers respectively"
+      |  ^~~~~~~
+In file included from C:/Personal/SeniorCapstone/tiltingPlatform_PID_tiltingSensor/main/i2c_lib.c:35,
+                 from C:/Personal/SeniorCapstone/tiltingPlatform_PID_tiltingSensor/main/tiltingPlatform.c:17:
+C:/Espressif/frameworks/esp-idf-v5.0/components/esp_adc/deprecated/include/esp_adc_cal.h:17:2: warning: #warning "legacy adc calibration driver is deprecated, please migrate to use esp_adc/adc_cali.h and esp_adc/adc_cali_scheme.h" [-Wcpp]
+   17 | #warning "legacy adc calibration driver is deprecated, please migrate to use esp_adc/adc_cali.h and esp_adc/adc_cali_scheme.h"
+      |  ^~~~~~~
+In file included from C:/Personal/SeniorCapstone/tiltingPlatform_PID_tiltingSensor/main/tiltingPlatform.c:17:
+C:/Personal/SeniorCapstone/tiltingPlatform_PID_tiltingSensor/main/i2c_lib.c: In function 'readRegister':
+C:/Personal/SeniorCapstone/tiltingPlatform_PID_tiltingSensor/main/i2c_lib.c:175:9: warning: unused variable 'ret' [-Wunused-variable]
+  175 |     int ret;
+      |         ^~~
+C:/Personal/SeniorCapstone/tiltingPlatform_PID_tiltingSensor/main/tiltingPlatform.c: In function 'app_main':
+C:/Personal/SeniorCapstone/tiltingPlatform_PID_tiltingSensor/main/tiltingPlatform.c:224:21: warning: passing argument 1 of 'xTaskCreate' from incompatible pointer type [-Wincompatible-pointer-types]
+  224 |         xTaskCreate(IMU_task, "IMU_task", 4096, NULL, 5, NULL);
+      |                     ^~~~~~~~
+      |                     |
+      |                     void (*)(void)
+In file included from C:/Personal/SeniorCapstone/tiltingPlatform_PID_tiltingSensor/main/tiltingPlatform.c:5:
+C:/Espressif/frameworks/esp-idf-v5.0/components/freertos/FreeRTOS-Kernel/include/freertos/task.h:444:44: note: expected 'TaskFunction_t' {aka 'void (*)(void *)'} but argument is of type 'void (*)(void)'
+  444 |                             TaskFunction_t pvTaskCode,
+      |                             ~~~~~~~~~~~~~~~^~~~~~~~~~
+C:/Personal/SeniorCapstone/tiltingPlatform_PID_tiltingSensor/main/tiltingPlatform.c:227:17: warning: passing argument 1 of 'xTaskCreate' from incompatible pointer type [-Wincompatible-pointer-types]
+  227 |     xTaskCreate(setAngle, "setAngle", 4096, NULL, 5, NULL);
+      |                 ^~~~~~~~
+      |                 |
+      |                 void (*)(void)
+In file included from C:/Personal/SeniorCapstone/tiltingPlatform_PID_tiltingSensor/main/tiltingPlatform.c:5:
+C:/Espressif/frameworks/esp-idf-v5.0/components/freertos/FreeRTOS-Kernel/include/freertos/task.h:444:44: note: expected 'TaskFunction_t' {aka 'void (*)(void *)'} but argument is of type 'void (*)(void)'
+  444 |                             TaskFunction_t pvTaskCode,
+      |                             ~~~~~~~~~~~~~~~^~~~~~~~~~
+At top level:
+C:/Personal/SeniorCapstone/tiltingPlatform_PID_tiltingSensor/main/tiltingPlatform.c:50:20: warning: 'TAG' defined but not used [-Wunused-variable]
+   50 | static const char *TAG = "example";
+      |                    ^~~
+[3/7] Linking C static library esp-idf\main\libmain.a
+[4/7] Generating ld/sections.ld
+[5/7] Linking CXX executable tiltingPlatform.elf
+[6/7] Generating binary image from built executable
+esptool.py v4.5
+Creating esp32 image...
+Merged 2 ELF sections
+Successfully created esp32 image.
+Generated C:/Personal/SeniorCapstone/tiltingPlatform_PID_tiltingSensor/build/tiltingPlatform.bin
+[7/7] cmd.exe /C "cd /D C:\Personal\SeniorCapstone\tiltingPlatform_PID_tiltingSensor\build\esp-idf\esptool_py && C:\Espressif\python_env\idf5.0_py3.8_env\Scripts\python.exe C:/Espressif/frameworks/esp-idf-v5.0/components/partition_table/check_sizes.py --offset 0x8000 partition --type app C:/Personal/SeniorCapstone/tiltingPlatform_PID_tiltingSensor/build/partition_table/partition-table.bin C:/Personal/SeniorCapstone/tiltingPlatform_PID_tiltingSensor/build/tiltingPlatform.bin"
+tiltingPlatform.bin binary size 0x36fa0 bytes. Smallest app partition is 0x100000 bytes. 0xc9060 bytes (79%) free.

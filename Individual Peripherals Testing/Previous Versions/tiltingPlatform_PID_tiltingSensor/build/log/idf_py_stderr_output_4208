@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "C:/Espressif/frameworks/esp-idf-v5.0/components/esptool_py/esptool/esptool.py", line 16, in <module>
+    import esptool
+  File "C:\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\__init__.py", line 41, in <module>
+    from esptool.cmds import (
+  File "C:\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\cmds.py", line 14, in <module>
+  File "C:\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\bin_image.py", line 14, in <module>
+    from .loader import ESPLoader
+  File "C:\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\esptool\loader.py", line 30, in <module>
+    import serial
+  File "C:\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\serial\__init__.py", line 29, in <module>
+  File "C:\Espressif\python_env\idf5.0_py3.8_env\lib\site-packages\serial\serialwin32.py", line 15, in <module>
+    import ctypes
+  File "ctypes\__init__.py", line 545, in <module>
+  File "<frozen importlib._bootstrap>",^C

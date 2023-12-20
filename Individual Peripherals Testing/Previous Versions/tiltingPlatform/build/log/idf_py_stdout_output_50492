@@ -1,0 +1,77 @@
+[1/10] Performing build step for 'bootloader'
+[1/1] cmd.exe /C "cd /D C:\Personal\SeniorCapstone\tiltingPlatform\build\bootloader\esp-idf\esptool_py && C:\Espressif\python_env\idf5.0_py3.8_env\Scripts\python.exe C:/Espressif/frameworks/esp-idf-v5.0/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 C:/Personal/SeniorCapstone/tiltingPlatform/build/bootloader/bootloader.bin"
+Bootloader binary size 0x66b0 bytes. 0x950 bytes (8%) free.
+[2/8] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/tiltingPlatform.c.obj
+In file included from C:/Personal/SeniorCapstone/tiltingPlatform/main/i2c_lib.c:31,
+                 from C:/Personal/SeniorCapstone/tiltingPlatform/main/tiltingPlatform.c:18:
+C:/Espressif/frameworks/esp-idf-v5.0/components/driver/deprecated/driver/adc.h:19:2: warning: #warning "legacy adc driver is deprecated, please migrate to use esp_adc/adc_oneshot.h and esp_adc/adc_continuous.h for oneshot mode and continuous mode drivers respectively" [-Wcpp]
+   19 | #warning "legacy adc driver is deprecated, please migrate to use esp_adc/adc_oneshot.h and esp_adc/adc_continuous.h for oneshot mode and continuous mode drivers respectively"
+      |  ^~~~~~~
+In file included from C:/Personal/SeniorCapstone/tiltingPlatform/main/i2c_lib.c:32,
+                 from C:/Personal/SeniorCapstone/tiltingPlatform/main/tiltingPlatform.c:18:
+C:/Espressif/frameworks/esp-idf-v5.0/components/esp_adc/deprecated/include/esp_adc_cal.h:17:2: warning: #warning "legacy adc calibration driver is deprecated, please migrate to use esp_adc/adc_cali.h and esp_adc/adc_cali_scheme.h" [-Wcpp]
+   17 | #warning "legacy adc calibration driver is deprecated, please migrate to use esp_adc/adc_cali.h and esp_adc/adc_cali_scheme.h"
+      |  ^~~~~~~
+C:/Personal/SeniorCapstone/tiltingPlatform/main/tiltingPlatform.c: In function 'app_main':
+C:/Personal/SeniorCapstone/tiltingPlatform/main/tiltingPlatform.c:223:17: warning: passing argument 1 of 'xTaskCreate' from incompatible pointer type [-Wincompatible-pointer-types]
+  223 |     xTaskCreate(IMU_task, "IMU_task", 4096, NULL, 5, NULL);
+      |                 ^~~~~~~~
+      |                 |
+      |                 void (*)(void)
+In file included from C:/Personal/SeniorCapstone/tiltingPlatform/main/tiltingPlatform.c:5:
+C:/Espressif/frameworks/esp-idf-v5.0/components/freertos/FreeRTOS-Kernel/include/freertos/task.h:444:44: note: expected 'TaskFunction_t' {aka 'void (*)(void *)'} but argument is of type 'void (*)(void)'
+  444 |                             TaskFunction_t pvTaskCode,
+      |                             ~~~~~~~~~~~~~~~^~~~~~~~~~
+[3/8] Linking C static library esp-idf\main\libmain.a
+[4/8] Generating ld/sections.ld
+[5/8] Linking CXX executable tiltingPlatform.elf
+[6/8] Generating binary image from built executable
+esptool.py v4.5
+Creating esp32 image...
+Merged 25 ELF sections
+Successfully created esp32 image.
+Generated C:/Personal/SeniorCapstone/tiltingPlatform/build/tiltingPlatform.bin
+[7/8] cmd.exe /C "cd /D C:\Personal\SeniorCapstone\tiltingPlatform\build\esp-idf\esptool_py && C:\Espressif\python_env\idf5.0_py3.8_env\Scripts\python.exe C:/Espressif/frameworks/esp-idf-v5.0/components/partition_table/check_sizes.py --offset 0x8000 partition --type app C:/Personal/SeniorCapstone/tiltingPlatform/build/partition_table/partition-table.bin C:/Personal/SeniorCapstone/tiltingPlatform/build/tiltingPlatform.bin"
+tiltingPlatform.bin binary size 0xbd050 bytes. Smallest app partition is 0x100000 bytes. 0x42fb0 bytes (26%) free.
+[7/8] cmd.exe /C "cd /D C:\Espressif\frameworks\esp-idf-v5.0\components\esptool_py && C:\Espressif\tools\cmake\3.23.1\bin\cmake.exe -D IDF_PATH=C:/Espressif/frameworks/esp-idf-v5.0 -D SERIAL_TOOL=C:/Espressif/python_env/idf5.0_py3.8_env/Scripts/python.exe;;C:/Espressif/frameworks/esp-idf-v5.0/components/esptool_py/esptool/esptool.py;--chip;esp32 -D SERIAL_TOOL_ARGS=--before=default_reset;--after=hard_reset;write_flash;@flash_args -D WORKING_DIRECTORY=C:/Personal/SeniorCapstone/tiltingPlatform/build -P C:/Espressif/frameworks/esp-idf-v5.0/components/esptool_py/run_serial_tool.cmake"
+esptool esp32 -p COM4 -b 460800 --before=default_reset --after=hard_reset write_flash --flash_mode dio --flash_freq 40m --flash_size 2MB 0x1000 bootloader/bootloader.bin 0x10000 tiltingPlatform.bin 0x8000 partition_table/partition-table.bin
+esptool.py v4.5
+Serial port COM4
+Connecting......
+Chip is ESP32-D0WDQ6 (revision v1.0)
+Features: WiFi, BT, Dual Core, 240MHz, VRef calibration in efuse, Coding Scheme None
+Crystal is 40MHz
+MAC: fc:f5:c4:06:b3:cc
+Uploading stub...
+Running stub...
+Stub running...
+Changing baud rate to 460800
+Changed.
+Configuring flash size...
+Flash will be erased from 0x00001000 to 0x00007fff...
+Flash will be erased from 0x00010000 to 0x000cdfff...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Compressed 26288 bytes to 16352...
+Writing at 0x00001000... (100 %)
+Wrote 26288 bytes (16352 compressed) at 0x00001000 in 0.8 seconds (effective 258.1 kbit/s)...
+Hash of data verified.
+Compressed 774224 bytes to 493285...
+Writing at 0x00010000... (3 %)
+Writing at 0x0001ccbf... (6 %)
+Writing at 0x00025dfc... (9 %)
+Writing at 0x0002b32f... (12 %)
+Writing at 0x0003548d... (16 %)
+Writing at 0x0003b00e... (19 %)
+Writing at 0x00040949... (22 %)
+Writing at 0x0004650c... (25 %)
+Writing at 0x0004be01... (29 %)
+Writing at 0x00051f83... (32 %)
+Writing at 0x000575a2... (35 %)
+Writing at 0x0005cc20... (38 %)
+Writing at 0x000624eb... (41 %)
+Writing at 0x00067d4c... (45 %)
+Writing at 0x0006dabb... (48 %)
+Writing at 0x0007378a... (51 %)
+Writing at 0x000789c0... (54 %)
+Writing at 0x0007de42... (58 %)
+ninja: build stopped: interrupted by user.
